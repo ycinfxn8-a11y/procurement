@@ -70,24 +70,40 @@ const form = document.getElementById('form-pengadaan')
 const list = document.getElementById('daftar-pengadaan')
 
 // 1. FUNGSI READ (Ambil Data)
-async function fetchPengadaan() {
-  const { data, error } = await supabase
+const searchInput = document.getElementById('search-input');
+
+// 1. Modifikasi Fungsi Fetch agar mendukung filter
+async function fetchPengadaan(query = '') {
+  let request = supabase
     .from('pengadaan')
     .select('*')
-    .order('created_at', { ascending: false })
+    .order('created_at', { ascending: false });
 
-  if (error) return console.error(error)
+  // Jika ada query pencarian, tambahkan filter ILIKE
+  if (query) {
+    request = request.ilike('nama_barang', `%${query}%`);
+  }
+
+  const { data, error } = await request;
+
+  if (error) return console.error(error);
 
   list.innerHTML = data.map(item => `
-  <li>
-    <div>
-      <strong>${item.nama_barang}</strong> <br>
-      <small>${item.jumlah} Unit</small>
-    </div>
-    <button class="btn-delete" onclick="hapusData(${item.id})">Hapus</button>
-  </li>
-`).join('')
+    <li>
+      <div>
+        <strong>${item.nama_barang}</strong> <br>
+        <small>${item.jumlah} Unit</small>
+      </div>
+      <button class="btn-delete" onclick="hapusData(${item.id})">Hapus</button>
+    </li>
+  `).join('');
 }
+
+// 2. Tambahkan Event Listener untuk Pencarian
+searchInput.addEventListener('input', (e) => {
+  const searchTerm = e.target.value;
+  fetchPengadaan(searchTerm);
+});
 
 // 2. FUNGSI CREATE (Tambah Data)
 form.addEventListener('submit', async (e) => {
