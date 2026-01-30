@@ -1,7 +1,7 @@
 import './style.css'
 import javascriptLogo from './javascript.svg'
 import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.js'
+// import { setupCounter } from './counter.js'
 import { supabase } from './supabase.js'
 
 async function getData() {
@@ -12,7 +12,59 @@ async function getData() {
 
 getData()
 
-document.querySelector('#app').innerHTML = `
+
+const form = document.getElementById('form-pengadaan')
+const list = document.getElementById('daftar-pengadaan')
+
+// 1. FUNGSI READ (Ambil Data)
+async function fetchPengadaan() {
+  const { data, error } = await supabase
+    .from('pengadaan')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error) return console.error(error)
+
+  list.innerHTML = data.map(item => `
+    <li>
+      <strong>${item.nama_barang}</strong> - ${item.jumlah} unit
+      <button onclick="hapusData(${item.id})">Hapus</button>
+    </li>
+  `).join('')
+}
+
+// 2. FUNGSI CREATE (Tambah Data)
+form.addEventListener('submit', async (e) => {
+  e.preventDefault()
+  const nama_barang = document.getElementById('nama_barang').value
+  const jumlah = document.getElementById('jumlah').value
+
+  const { error } = await supabase
+    .from('pengadaan')
+    .insert([{ nama_barang, jumlah }])
+
+  if (error) alert(error.message)
+  else {
+    form.reset()
+    fetchPengadaan() // Refresh list
+  }
+})
+
+// 3. FUNGSI DELETE (Hapus Data)
+window.hapusData = async (id) => {
+  const { error } = await supabase
+    .from('pengadaan')
+    .delete()
+    .eq('id', id)
+
+  if (error) alert(error.message)
+  else fetchPengadaan()
+}
+
+// Jalankan saat pertama kali load
+fetchPengadaan()
+
+/* document.querySelector('#app').innerHTML = `
   <div>
     <a href="https://vite.dev" target="_blank">
       <img src="${viteLogo}" class="logo" alt="Vite logo" />
@@ -28,6 +80,6 @@ document.querySelector('#app').innerHTML = `
       Click on the Vite logo to learn more
     </p>
   </div>
-`
+` */
 
-setupCounter(document.querySelector('#counter'))
+// setupCounter(document.querySelector('#counter'))
