@@ -4,19 +4,40 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./style.css">
     <title>procurement</title>
   </head>
   <body>
-    <h1>E-Pengadaan Barang</h1>
-  
-  <form id="form-pengadaan">
-    <input type="text" id="nama_barang" placeholder="Nama Barang" required>
-    <input type="number" id="jumlah" placeholder="Jumlah" required>
-    <button type="submit">Tambah</button>
-  </form>
 
-  <ul id="daftar-pengadaan"></ul>
-</div>
+    <div id="app">
+      <div id="auth-section">
+        <h2>Login / Register</h2>
+        <form id="auth-form">
+          <input type="email" id="email" placeholder="Email" required>
+          <input type="password" id="password" placeholder="Password" required>
+          <div class="buttons">
+            <button type="button" id="btn-login">Login</button>
+            <button type="button" id="btn-register">Register</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="main-content" style="display: none;">
+        <div class="header">
+          <span id="user-email"></span>
+          <button id="btn-logout">Logout</button>
+        </div>
+        
+        <h1>E-Pengadaan Barang</h1>
+        <form id="form-pengadaan">
+          <input type="text" id="nama_barang" placeholder="Nama Barang" required>
+          <input type="number" id="jumlah" placeholder="Jumlah" required>
+          <button type="submit">Tambah</button>
+        </form>
+        <ul id="daftar-pengadaan"></ul>
+      </div>
+    </div>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

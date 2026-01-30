@@ -12,6 +12,59 @@ async function getData() {
 
 getData()
 
+// Element UI
+const authSection = document.getElementById('auth-section')
+const mainContent = document.getElementById('main-content')
+const userEmailSpan = document.getElementById('user-email')
+
+// Langganan perubahan data (Real-time)
+supabase
+  .channel('public:pengadaan')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'pengadaan' }, () => {
+    fetchPengadaan()
+  })
+  .subscribe()
+
+// --- LOGIKA AUTENTIKASI ---
+
+// 1. Cek Status Login (Otomatis)
+supabase.auth.onAuthStateChange((event, session) => {
+  if (session) {
+    // User login
+    authSection.style.display = 'none'
+    mainContent.style.display = 'block'
+    userEmailSpan.innerText = `Halo, ${session.user.email}`
+    fetchPengadaan() // Ambil data saat login
+  } else {
+    // User logout
+    authSection.style.display = 'block'
+    mainContent.style.display = 'none'
+  }
+})
+
+// 2. Register
+document.getElementById('btn-register').addEventListener('click', async () => {
+  alert('AAAA!')
+  const email = document.getElementById('email').value
+  const password = document.getElementById('password').value
+  const { error } = await supabase.auth.signUp({ email, password })
+  if (error) alert(error.message)
+  else alert('Cek email kamu untuk konfirmasi pendaftaran!')
+
+})
+
+// 3. Login
+document.getElementById('btn-login').addEventListener('click', async () => {
+  const email = document.getElementById('email').value
+  const password = document.getElementById('password').value
+  const { error } = await supabase.auth.signInWithPassword({ email, password })
+  if (error) alert(error.message)
+})
+
+// 4. Logout
+document.getElementById('btn-logout').addEventListener('click', async () => {
+  await supabase.auth.signOut()
+})
 
 const form = document.getElementById('form-pengadaan')
 const list = document.getElementById('daftar-pengadaan')
@@ -26,11 +79,14 @@ async function fetchPengadaan() {
   if (error) return console.error(error)
 
   list.innerHTML = data.map(item => `
-    <li>
-      <strong>${item.nama_barang}</strong> - ${item.jumlah} unit
-      <button onclick="hapusData(${item.id})">Hapus</button>
-    </li>
-  `).join('')
+  <li>
+    <div>
+      <strong>${item.nama_barang}</strong> <br>
+      <small>${item.jumlah} Unit</small>
+    </div>
+    <button class="btn-delete" onclick="hapusData(${item.id})">Hapus</button>
+  </li>
+`).join('')
 }
 
 // 2. FUNGSI CREATE (Tambah Data)
