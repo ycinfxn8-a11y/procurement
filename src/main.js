@@ -74,6 +74,8 @@ const searchInput = document.getElementById('search-input');
 
 // 1. Modifikasi Fungsi Fetch agar mendukung filter
 async function fetchPengadaan(query = '') {
+  list.innerHTML = '<li class="loading">Memuat data...</li>';
+
   let request = supabase
     .from('pengadaan')
     .select('*')
@@ -86,7 +88,15 @@ async function fetchPengadaan(query = '') {
 
   const { data, error } = await request;
 
-  if (error) return console.error(error);
+  if (error) {
+    list.innerHTML = '<li class="error">Gagal memuat data.</li>';
+    return console.error(error);
+  }
+
+  if (data.length === 0) {
+    list.innerHTML = '<p style="text-align:center; color:gray;">Barang tidak ditemukan.</p>';
+    return;
+  }
 
   list.innerHTML = data.map(item => `
     <li>
