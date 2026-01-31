@@ -1,16 +1,16 @@
 import './style.css'
-import javascriptLogo from './javascript.svg'
-import viteLogo from '/vite.svg'
+// import javascriptLogo from './javascript.svg'
+// import viteLogo from '/vite.svg'
 // import { setupCounter } from './counter.js'
 import { supabase } from './supabase.js'
 
-async function getData() {
+/* async function getData() {
   const { data, error } = await supabase.from('obat').select('*')
   if (error) console.log('Error:', error)
   else console.log('Data:', data)
 }
 
-getData()
+getData() */
 
 // Element UI
 const authSection = document.getElementById('auth-section')
@@ -22,6 +22,7 @@ supabase
   .channel('public:pengadaan')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'pengadaan' }, () => {
     fetchPengadaan()
+    console.log("realtime update")
   })
   .subscribe()
 
@@ -43,15 +44,14 @@ supabase.auth.onAuthStateChange((event, session) => {
 })
 
 // 2. Register
-document.getElementById('btn-register').addEventListener('click', async () => {
-  alert('AAAA!')
+/* document.getElementById('btn-register').addEventListener('click', async () => {
   const email = document.getElementById('email').value
   const password = document.getElementById('password').value
   const { error } = await supabase.auth.signUp({ email, password })
   if (error) alert(error.message)
   else alert('Cek email kamu untuk konfirmasi pendaftaran!')
 
-})
+}) */
 
 // 3. Login
 document.getElementById('btn-login').addEventListener('click', async () => {
@@ -70,7 +70,7 @@ const form = document.getElementById('form-pengadaan')
 const list = document.getElementById('daftar-pengadaan')
 
 // 1. FUNGSI READ (Ambil Data)
-const searchInput = document.getElementById('search-input');
+// const searchInput = document.getElementById('search-input');
 
 // 1. Modifikasi Fungsi Fetch agar mendukung filter
 async function fetchPengadaan(query = '') {
@@ -110,10 +110,10 @@ async function fetchPengadaan(query = '') {
 }
 
 // 2. Tambahkan Event Listener untuk Pencarian
-searchInput.addEventListener('input', (e) => {
+/* searchInput.addEventListener('input', (e) => {
   const searchTerm = e.target.value;
   fetchPengadaan(searchTerm);
-});
+}); */
 
 // 2. FUNGSI CREATE (Tambah Data)
 form.addEventListener('submit', async (e) => {
@@ -145,23 +145,4 @@ window.hapusData = async (id) => {
 
 // Jalankan saat pertama kali load
 fetchPengadaan()
-
-/* document.querySelector('#app').innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
-` */
-
-// setupCounter(document.querySelector('#counter'))
+console.log("pertama load")
