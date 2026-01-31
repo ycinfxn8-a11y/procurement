@@ -271,6 +271,10 @@ form.addEventListener('submit', async (e) => {
   if (!selectedBarangId) return alert("Pilih barang terlebih dahulu!");
 
   const jumlah = document.getElementById('jumlah').value;
+  if (jumlah <= 0) {
+    alert("Jumlah barang harus lebih dari 0!");
+    return;
+  }
   const tanggal_transaksi = document.getElementById('tanggal_transaksi').value;
 
   const { error } = await supabase
@@ -299,6 +303,38 @@ window.hapusData = async (id) => {
   if (error) alert(error.message)
   //selse fetchPengadaan()
 }
+
+document.getElementById('btn-export').addEventListener('click', async () => {
+  // 1. Ambil semua data
+  const { data, error } = await supabase
+    .from('pengadaan')
+    .select('*, barang(nama_barang)') 
+    .order('tanggal_transaksi', { ascending: false });
+
+  if (error) return alert('Gagal mengambil data untuk export');
+
+  // 2. Buat header CSV
+  let csvContent = "Tanggal;Nama Barang;Jumlah\n";
+
+  csvContent += data.map(item => `${new Date(item.tanggal_transaksi).toLocaleDateString()};${item.barang?.nama_barang || 'Terhapus'};${item.jumlah};`).join('\n');
+
+  // 3. Masukkan data ke CSV
+/*   data.forEach(item => {
+    const row = `${new Date(item.tanggal_transaksi).toLocaleDateString()},${barang.nama_barang},${item.jumlah}\n`;
+    csvContent += row;
+  }); */
+
+  // 4. Proses Download
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", "laporan_pengadaan.csv");
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+});
 
 // Jalankan saat pertama kali load
 fetchPengadaan()

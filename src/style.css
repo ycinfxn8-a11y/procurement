@@ -221,3 +221,26 @@ hr {
   background-color: #cbd5e1;
   cursor: not-allowed;
 }
+
+.loading, .empty, .error {
+  text-align: center;
+  padding: 20px;
+  color: #64748b;
+  background: none !important; /* Menghilangkan background abu-abu li */
+}
+
+.actions {
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-secondary {
+  background-color: #10b981; /* Warna hijau untuk Excel/Export */
+  font-size: 0.8rem;
+  padding: 8px 15px;
+}
+
+.btn-secondary:hover {
+  background-color: #059669;
+}
