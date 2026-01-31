@@ -29,7 +29,7 @@ menuSwitcher.addEventListener('change', (e) => {
   // Opsional: Refresh data setiap kali pindah halaman
   if (targetPage === 'page-transaksi') fetchPengadaan();
   if (targetPage === 'page-barang') {
-    fetchDaftarBarang(); 
+    // fetchDaftarBarang(); 
     renderMasterBarang();
   }
 });
@@ -40,6 +40,71 @@ const mainContent = document.getElementById('main-content')
 const userEmailSpan = document.getElementById('user-email')
 
 const formMaster = document.getElementById('form-master-barang');
+
+
+
+let selectedBarangId = null; // Variable untuk menyimpan ID barang yang dipilih
+
+const inputCari = document.getElementById('input-cari-barang');
+const hasilCari = document.getElementById('hasil-cari-barang');
+const displayPilihan = document.getElementById('display-pilihan-barang');
+const areaCari = document.getElementById('area-cari');
+const namaTerpilih = document.getElementById('nama-barang-terpilih');
+const btnBersihkan = document.getElementById('btn-bersihkan-pilihan');
+const btnSubmit = document.getElementById('btn-submit-pengadaan');
+
+// 1. Fungsi mencari barang di database (saat mengetik)
+inputCari.addEventListener('input', async (e) => {
+  const query = e.target.value;
+  if (query.length < 1) {
+    hasilCari.innerHTML = '';
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from('barang')
+    .select('id, nama_barang')
+    .ilike('nama_barang', `%${query}%`)
+    .limit(5); // Batasi hasil pencarian
+
+  if (data) {
+    hasilCari.innerHTML = data.map(b => `
+      <li>
+        <span>${b.nama_barang}</span>
+        <button type="button" class="btn-pilih" onclick="pilihBarang('${b.id}', '${b.nama_barang}')">Pilih</button>
+      </li>
+    `).join('');
+  }
+});
+
+// 2. Fungsi saat tombol "Pilih" diklik
+window.pilihBarang = (id, nama) => {
+  selectedBarangId = id;
+  namaTerpilih.innerText = nama;
+  
+  // Tukar tampilan
+  areaCari.style.display = 'none';
+  displayPilihan.style.display = 'flex';
+  hasilCari.innerHTML = '';
+  inputCari.value = '';
+  
+  // Aktifkan tombol submit
+  btnSubmit.disabled = false;
+};
+
+// 3. Fungsi tombol "Bersihkan Pilihan"
+btnBersihkan.addEventListener('click', () => {
+  selectedBarangId = null;
+  
+  // Kembalikan tampilan
+  areaCari.style.display = 'block';
+  displayPilihan.style.display = 'none';
+  
+  // Matikan tombol submit
+  btnSubmit.disabled = true;
+});
+
+
 
 // 1. Simpan Master Barang Baru
 formMaster.addEventListener('submit', async (e) => {
@@ -56,7 +121,8 @@ formMaster.addEventListener('submit', async (e) => {
   } else {
     alert("Barang berhasil ditambahkan!");
     formMaster.reset();
-    fetchDaftarBarang(); // Refresh isi dropdown agar barang baru muncul
+    // fetchDaftarBarang(); // Refresh isi dropdown agar barang baru muncul
+    renderMasterBarang();
   }
 });
 
@@ -64,12 +130,12 @@ formMaster.addEventListener('submit', async (e) => {
 document.getElementById('tanggal_transaksi').valueAsDate = new Date();
 
 // Tambahkan Realtime untuk tabel barang juga agar sinkron antar tab
-supabase
-  .channel('public:barang')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'barang' }, () => {
-    fetchDaftarBarang();
-  })
-  .subscribe();
+// supabase
+//   .channel('public:barang')
+//   .on('postgres_changes', { event: '*', schema: 'public', table: 'barang' }, () => {
+//     fetchDaftarBarang();
+//   })
+//   .subscribe();
 
 // Langganan perubahan data (Real-time)
 const channel = supabase
@@ -133,7 +199,7 @@ document.getElementById('btn-logout').addEventListener('click', async () => {
 const form = document.getElementById('form-pengadaan')
 const list = document.getElementById('daftar-pengadaan')
 
-async function fetchDaftarBarang() {
+/* async function fetchDaftarBarang() {
   const { data, error } = await supabase.from('barang').select('*').order('nama_barang');
   const selectBarang = document.getElementById('select-barang');
   
@@ -141,7 +207,7 @@ async function fetchDaftarBarang() {
     selectBarang.innerHTML = '<option value="">-- Pilih Barang --</option>' + 
       data.map(b => `<option value="${b.id}">${b.nama_barang}</option>`).join('');
   }
-}
+} */
 
 async function renderMasterBarang() {
   const { data } = await supabase.from('barang').select('*').order('nama_barang');
@@ -202,17 +268,23 @@ async function fetchPengadaan(query = '') {
 // 2. FUNGSI CREATE (Tambah Data)
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const barang_id = document.getElementById('select-barang').value;
+  if (!selectedBarangId) return alert("Pilih barang terlebih dahulu!");
+
   const jumlah = document.getElementById('jumlah').value;
   const tanggal_transaksi = document.getElementById('tanggal_transaksi').value;
 
   const { error } = await supabase
     .from('pengadaan')
-    .insert([{ barang_id, jumlah, tanggal_transaksi }]);
+    .insert([{ 
+      barang_id: selectedBarangId, 
+      jumlah, 
+      tanggal_transaksi 
+    }]);
 
   if (error) alert(error.message);
   else {
     form.reset();
+    btnBersihkan.click(); // Reset pilihan barang
     fetchPengadaan();
   }
 });
@@ -230,4 +302,4 @@ window.hapusData = async (id) => {
 
 // Jalankan saat pertama kali load
 fetchPengadaan()
-fetchDaftarBarang()
+// fetchDaftarBarang()
