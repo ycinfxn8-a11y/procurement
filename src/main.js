@@ -18,13 +18,23 @@ const mainContent = document.getElementById('main-content')
 const userEmailSpan = document.getElementById('user-email')
 
 // Langganan perubahan data (Real-time)
-supabase
-  .channel('public:pengadaan')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'pengadaan' }, () => {
-    fetchPengadaan()
-    console.log("realtime update")
-  })
-  .subscribe()
+const channel = supabase
+  .channel('perubahan-pengadaan') // Nama bebas
+  .on(
+    'postgres_changes', 
+    { 
+      event: '*', 
+      schema: 'public', 
+      table: 'pengadaan' 
+    }, 
+    (payload) => {
+      console.log('Ada perubahan data!', payload);
+      fetchPengadaan(); // Panggil fungsi untuk memperbarui list
+    }
+  )
+  .subscribe((status) => {
+    console.log('Status Realtime:', status);
+  });
 
 // --- LOGIKA AUTENTIKASI ---
 
