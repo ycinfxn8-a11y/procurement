@@ -17,6 +17,38 @@ const authSection = document.getElementById('auth-section')
 const mainContent = document.getElementById('main-content')
 const userEmailSpan = document.getElementById('user-email')
 
+const formMaster = document.getElementById('form-master-barang');
+
+// 1. Simpan Master Barang Baru
+formMaster.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const nama_barang = document.getElementById('master-nama').value;
+  const satuan = document.getElementById('master-satuan').value;
+
+  const { error } = await supabase
+    .from('barang')
+    .insert([{ nama_barang, satuan }]);
+
+  if (error) {
+    alert("Error: " + error.message);
+  } else {
+    alert("Barang berhasil ditambahkan!");
+    formMaster.reset();
+    fetchDaftarBarang(); // Refresh isi dropdown agar barang baru muncul
+  }
+});
+
+// 2. Set tanggal default hari ini pada form pengadaan
+document.getElementById('tanggal_transaksi').valueAsDate = new Date();
+
+// Tambahkan Realtime untuk tabel barang juga agar sinkron antar tab
+supabase
+  .channel('public:barang')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'barang' }, () => {
+    fetchDaftarBarang();
+  })
+  .subscribe();
+
 // Langganan perubahan data (Real-time)
 const channel = supabase
   .channel('perubahan-pengadaan') // Nama bebas
@@ -79,42 +111,44 @@ document.getElementById('btn-logout').addEventListener('click', async () => {
 const form = document.getElementById('form-pengadaan')
 const list = document.getElementById('daftar-pengadaan')
 
+async function fetchDaftarBarang() {
+  const { data, error } = await supabase.from('barang').select('*').order('nama_barang');
+  const selectBarang = document.getElementById('select-barang');
+  
+  if (data) {
+    selectBarang.innerHTML = '<option value="">-- Pilih Barang --</option>' + 
+      data.map(b => `<option value="${b.id}">${b.nama_barang}</option>`).join('');
+  }
+}
+
 // 1. FUNGSI READ (Ambil Data)
 // const searchInput = document.getElementById('search-input');
 
 // 1. Modifikasi Fungsi Fetch agar mendukung filter
 async function fetchPengadaan(query = '') {
-  list.innerHTML = '<li class="loading">Memuat data...</li>';
+  list.innerHTML = '<li>Memuat...</li>';
 
+  // Perhatikan format select: '*, barang(nama_barang)' ini adalah JOIN
   let request = supabase
     .from('pengadaan')
-    .select('*')
-    .order('created_at', { ascending: false });
+    .select('*, barang(nama_barang)') 
+    .order('tanggal_transaksi', { ascending: false });
 
-  // Jika ada query pencarian, tambahkan filter ILIKE
   if (query) {
-    request = request.ilike('nama_barang', `%${query}%`);
+    // Cari berdasarkan nama barang di tabel relasi
+    request = request.ilike('barang.nama_barang', `%${query}%`);
   }
 
   const { data, error } = await request;
-
-  if (error) {
-    list.innerHTML = '<li class="error">Gagal memuat data.</li>';
-    return console.error(error);
-  }
-
-  if (data.length === 0) {
-    list.innerHTML = '<p style="text-align:center; color:gray;">Barang tidak ditemukan.</p>';
-    return;
-  }
+  if (error) return console.error(error);
 
   list.innerHTML = data.map(item => `
     <li>
       <div>
-        <strong>${item.nama_barang}</strong> <br>
-        <small>${item.jumlah} Unit</small>
+        <strong>${item.barang?.nama_barang || 'Terhapus'}</strong> <br>
+        <small>${item.jumlah} Unit - Tgl: ${item.tanggal_transaksi}</small>
       </div>
-      <button class="btn-delete" onclick="hapusData(${item.id})">Hapus</button>
+      <button class="btn-delete" onclick="hapusData('${item.id}')">Hapus</button>
     </li>
   `).join('');
 }
@@ -127,20 +161,21 @@ async function fetchPengadaan(query = '') {
 
 // 2. FUNGSI CREATE (Tambah Data)
 form.addEventListener('submit', async (e) => {
-  e.preventDefault()
-  const nama_barang = document.getElementById('nama_barang').value
-  const jumlah = document.getElementById('jumlah').value
+  e.preventDefault();
+  const barang_id = document.getElementById('select-barang').value;
+  const jumlah = document.getElementById('jumlah').value;
+  const tanggal_transaksi = document.getElementById('tanggal_transaksi').value;
 
   const { error } = await supabase
     .from('pengadaan')
-    .insert([{ nama_barang, jumlah }])
+    .insert([{ barang_id, jumlah, tanggal_transaksi }]);
 
-  if (error) alert(error.message)
+  if (error) alert(error.message);
   else {
-    form.reset()
-    //fetchPengadaan() // Refresh list
+    form.reset();
+    fetchPengadaan();
   }
-})
+});
 
 // 3. FUNGSI DELETE (Hapus Data)
 window.hapusData = async (id) => {

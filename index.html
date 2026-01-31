@@ -28,13 +28,28 @@
           <button id="btn-logout">Logout</button>
         </div>
         
-        <h1>E-Pengadaan Barang</h1>
-        <form id="form-pengadaan">
-          <input type="text" id="nama_barang" placeholder="Nama Barang" required>
-          <input type="number" id="jumlah" placeholder="Jumlah" required>
-          <button type="submit">Tambah</button>
-          
+        <div class="card-section">
+        <h3>📦 Tambah Master Barang</h3>
+        <form id="form-master-barang">
+          <input type="text" id="master-nama" placeholder="Nama Barang (contoh: Laptop)" required>
+          <input type="text" id="master-satuan" placeholder="Satuan (contoh: Unit/Pcs)" required>
+          <button type="submit" class="btn-green">Simpan Barang</button>
         </form>
+      </div>
+
+      <hr>
+
+      <div class="card-section">
+        <h3>📝 Catat Pengadaan Baru</h3>
+        <form id="form-pengadaan">
+          <select id="select-barang" required>
+            <option value="">-- Pilih Barang --</option>
+          </select>
+          <input type="number" id="jumlah" placeholder="Jumlah" required>
+          <input type="date" id="tanggal_transaksi" required>
+          <button type="submit">Tambah Pengadaan</button>
+        </form>
+      </div>
 
         <ul id="daftar-pengadaan"></ul>
         <!-- <div class="search-container">
@@ -44,5 +59,6 @@
     </div>
 
     <script type="module" src="/src/main.js"></script>
+
   </body>
 </html>
