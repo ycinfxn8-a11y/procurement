@@ -138,7 +138,7 @@ form.addEventListener('submit', async (e) => {
   if (error) alert(error.message)
   else {
     form.reset()
-    fetchPengadaan() // Refresh list
+    //fetchPengadaan() // Refresh list
   }
 })
 
@@ -150,7 +150,7 @@ window.hapusData = async (id) => {
     .eq('id', id)
 
   if (error) alert(error.message)
-  else fetchPengadaan()
+  //selse fetchPengadaan()
 }
 
 // Jalankan saat pertama kali load
