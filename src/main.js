@@ -336,6 +336,42 @@ document.getElementById('btn-export').addEventListener('click', async () => {
   document.body.removeChild(link);
 });
 
+async function updateDashboard() {
+  // 1. Hitung Total Jenis Barang
+  const { count: countBarang } = await supabase
+    .from('barang')
+    .select('*', { count: 'exact', head: true });
+
+  // 2. Hitung Total Unit (Sum dari kolom jumlah)
+  const { data: dataUnit } = await supabase
+    .from('pengadaan')
+    .select('jumlah');
+  const totalUnit = dataUnit?.reduce((acc, curr) => acc + curr.jumlah, 0) || 0;
+
+  // 3. Hitung Transaksi Hari Ini
+  const hariIni = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+  const { count: countHariIni } = await supabase
+    .from('pengadaan')
+    .select('*', { count: 'exact', head: true })
+    .eq('tanggal_transaksi', hariIni);
+
+  // Update UI
+  document.getElementById('stat-total-barang').innerText = countBarang || 0;
+  document.getElementById('stat-total-unit').innerText = totalUnit;
+  document.getElementById('stat-transaksi-hari-ini').innerText = countHariIni || 0;
+}
+
+// Tambahkan updateDashboard() ke dalam switcher menu
+menuSwitcher.addEventListener('change', (e) => {
+  const targetPage = e.target.value;
+  // ... logika display block/none yang sudah ada ...
+  
+  if (targetPage === 'page-dashboard') updateDashboard();
+});
+
+// Jalankan saat pertama kali load
+updateDashboard();
+
 // Jalankan saat pertama kali load
 fetchPengadaan()
 // fetchDaftarBarang()

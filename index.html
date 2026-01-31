@@ -30,13 +30,30 @@
         
         <div class="nav-container">
           <label for="menu-switcher">Pilih Menu:</label>
-          <select id="menu-switcher">
-            <option value="page-transaksi">📝 Transaksi Pengadaan</option>
-            <option value="page-barang">🧑🏻‍💻 Master Barang</option>
-          </select>
+         <select id="menu-switcher">
+          <option value="page-dashboard">📊 Dashboard</option> <option value="page-transaksi">📝 Transaksi Pengadaan</option>
+          <option value="page-barang">📦 Master Barang</option>
+        </select>
         </div>
 
         <hr>
+
+        <section id="page-dashboard" class="content-page">
+          <div class="summary-grid">
+            <div class="summary-card">
+              <h4>Total Jenis Barang</h4>
+              <p id="stat-total-barang">0</p>
+            </div>
+            <div class="summary-card">
+              <h4>Total Unit Masuk</h4>
+              <p id="stat-total-unit">0</p>
+            </div>
+            <div class="summary-card">
+              <h4>Transaksi Hari Ini</h4>
+              <p id="stat-transaksi-hari-ini">0</p>
+            </div>
+          </div>
+        </section>
 
         <section id="page-transaksi" class="content-page">
           <h2>Daftar Pengadaan</h2>
