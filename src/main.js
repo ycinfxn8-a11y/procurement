@@ -190,4 +190,4 @@ window.hapusData = async (id) => {
 
 // Jalankan saat pertama kali load
 fetchPengadaan()
-console.log("pertama load")
+fetchDaftarBarang()
