@@ -12,6 +12,28 @@ import { supabase } from './supabase.js'
 
 getData() */
 
+const menuSwitcher = document.getElementById('menu-switcher');
+const pages = document.querySelectorAll('.content-page');
+
+menuSwitcher.addEventListener('change', (e) => {
+  const targetPage = e.target.value;
+
+  pages.forEach(page => {
+    if (page.id === targetPage) {
+      page.style.display = 'block';
+    } else {
+      page.style.display = 'none';
+    }
+  });
+
+  // Opsional: Refresh data setiap kali pindah halaman
+  if (targetPage === 'page-transaksi') fetchPengadaan();
+  if (targetPage === 'page-barang') {
+    fetchDaftarBarang(); 
+    renderMasterBarang();
+  }
+});
+
 // Element UI
 const authSection = document.getElementById('auth-section')
 const mainContent = document.getElementById('main-content')
@@ -120,6 +142,24 @@ async function fetchDaftarBarang() {
       data.map(b => `<option value="${b.id}">${b.nama_barang}</option>`).join('');
   }
 }
+
+async function renderMasterBarang() {
+  const { data } = await supabase.from('barang').select('*').order('nama_barang');
+  const container = document.getElementById('list-master-barang');
+  
+  if (data) {
+    container.innerHTML = data.map(b => `
+      <li>
+        <div>
+          <strong>${b.nama_barang}</strong> <br>
+          <small>Satuan: ${b.satuan}</small>
+        </div>
+      </li>
+    `).join('');
+  }
+}
+
+// Panggil fungsi ini di dalam event listener menuSwitcher jika targetPage === 'page-barang'
 
 // 1. FUNGSI READ (Ambil Data)
 // const searchInput = document.getElementById('search-input');
