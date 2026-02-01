@@ -394,3 +394,37 @@ hr {
   font-weight: 600;
   color: #64748b;
 }
+
+.filter-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  background: #f8fafc;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #e2e8f0;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filter-group label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.filter-group input {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  border: 1px solid #cbd5e1;
+}
+
+#btn-reset-filter {
+  height: 35px; /* Biar sejajar dengan input */
+}

@@ -251,14 +251,23 @@ document.getElementById('next-barang').onclick = () => { halBarang++; renderMast
 // Panggil fungsi ini di dalam event listener menuSwitcher jika targetPage === 'page-barang'
 
 // 1. FUNGSI READ (Ambil Data)
-// const searchInput = document.getElementById('search-input');
+const searchInput = document.getElementById('search-input');
 
 let halTransaksi = 1;
 let halBarang = 1;
 const LIMIT = 5; // Maksimal 5 item
 
+// Ambil elemen filter
+const filterStart = document.getElementById('filter-start-date');
+const filterEnd = document.getElementById('filter-end-date');
+const btnResetFilter = document.getElementById('btn-reset-filter');
+
 // 1. Modifikasi Fungsi Fetch agar mendukung filter
 async function fetchPengadaan(query = '') {
+  const querySearch = document.getElementById('search-input').value;
+  const startDate = filterStart.value;
+  const endDate = filterEnd.value;
+
   list.innerHTML = '<li>Memuat...</li>';
   
   // Hitung range data
@@ -271,8 +280,17 @@ async function fetchPengadaan(query = '') {
     .order('tanggal_transaksi', { ascending: false })
     .range(dari, ke); // AMBIL DATA SESUAI RANGE
 
-  if (query) {
-    request = request.ilike('barang.nama_barang', `%${query}%`);
+  // Filter Nama Barang (Search)
+  if (querySearch) {
+    request = request.ilike('barang.nama_barang', `%${querySearch}%`);
+  }
+
+  // Filter Rentang Tanggal
+  if (startDate) {
+    request = request.gte('tanggal_transaksi', startDate);
+  }
+  if (endDate) {
+    request = request.lte('tanggal_transaksi', endDate);
   }
 
   const { data, count, error } = await request;
@@ -297,15 +315,26 @@ async function fetchPengadaan(query = '') {
   document.getElementById('next-transaksi').disabled = (ke >= count - 1);
 }
 
+// Event Listeners untuk Filter
+filterStart.addEventListener('change', () => { halTransaksi = 1; fetchPengadaan(); });
+filterEnd.addEventListener('change', () => { halTransaksi = 1; fetchPengadaan(); });
+
+btnResetFilter.addEventListener('click', () => {
+  filterStart.value = '';
+  filterEnd.value = '';
+  halTransaksi = 1;
+  fetchPengadaan();
+});
+
 // Event Listener Tombol Transaksi
 document.getElementById('prev-transaksi').onclick = () => { halTransaksi--; fetchPengadaan(); };
 document.getElementById('next-transaksi').onclick = () => { halTransaksi++; fetchPengadaan(); };
 
 // 2. Tambahkan Event Listener untuk Pencarian
-/* searchInput.addEventListener('input', (e) => {
+searchInput.addEventListener('input', (e) => {
   const searchTerm = e.target.value;
   fetchPengadaan(searchTerm);
-}); */
+});
 
 // 2. FUNGSI CREATE (Tambah Data)
 form.addEventListener('submit', async (e) => {
