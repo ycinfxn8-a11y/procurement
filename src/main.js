@@ -274,9 +274,14 @@ async function fetchPengadaan(query = '') {
   const dari = (halTransaksi - 1) * LIMIT;
   const ke = dari + LIMIT - 1;
 
+  let selectQuery = '*, barang(nama_barang)';
+  if (querySearch) {
+    selectQuery = '*, barang!inner(nama_barang)';
+  }
+
   let request = supabase
     .from('pengadaan')
-    .select('*, barang(nama_barang)', { count: 'exact' }) // Ambil 'count' untuk total data
+    .select(selectQuery, { count: 'exact' }) // Ambil 'count' untuk total data
     .order('tanggal_transaksi', { ascending: false })
     .range(dari, ke); // AMBIL DATA SESUAI RANGE
 
@@ -296,16 +301,23 @@ async function fetchPengadaan(query = '') {
   const { data, count, error } = await request;
   if (error) return console.error(error);
 
-  list.innerHTML = data.map(item => `
-    <li>
-      <div>
-        <strong>${item.barang?.nama_barang || 'Terhapus'}</strong> <br>
-        <small>${item.jumlah} Unit - Tgl: ${item.tanggal_transaksi}</small>
-      </div>
-      <button class="btn-edit" onclick="bukaEditTransaksi('${item.id}')">Edit</button>
-      <button class="btn-delete" onclick="hapusData('${item.id}')">Hapus</button>
-    </li>
-  `).join('');
+  list.innerHTML = data.map(item => {
+    // Jika karena suatu hal barang_id tidak ada di master (benar-benar terhapus)
+    const namaBarang = item.barang ? item.barang.nama_barang : '<span style="color:red;">Master Barang Hilang</span>';
+    
+    return `
+      <li>
+        <div>
+          <strong>${namaBarang}</strong> <br>
+          <small>${item.jumlah} Unit - Tgl: ${item.tanggal_transaksi}</small>
+        </div>
+        <div>
+          <button class="btn-edit" onclick="bukaEditTransaksi('${item.id}')">Edit</button>
+          <button class="btn-delete" onclick="hapusData('${item.id}')">Hapus</button>
+        </div>
+      </li>
+    `;
+  }).join('');
 
   // Update Info Halaman
   document.getElementById('page-info-transaksi').innerText = `Halaman ${halTransaksi}`;
@@ -322,6 +334,7 @@ filterEnd.addEventListener('change', () => { halTransaksi = 1; fetchPengadaan();
 btnResetFilter.addEventListener('click', () => {
   filterStart.value = '';
   filterEnd.value = '';
+  searchInput.value = '';
   halTransaksi = 1;
   fetchPengadaan();
 });

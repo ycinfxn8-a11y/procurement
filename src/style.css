@@ -149,7 +149,7 @@ li {
 }
 
 #search-input {
-
+  width: 200px;
   border-radius: 25px; /* Membuatnya lebih bulat */
   padding: 12px;
   background-color: #f1f5f9;
