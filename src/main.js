@@ -35,9 +35,12 @@ menuSwitcher.addEventListener('change', (e) => {
 });
 
 // Element UI
-const authSection = document.getElementById('auth-section')
-const mainContent = document.getElementById('main-content')
-const userEmailSpan = document.getElementById('user-email')
+const pageTransaksi = document.getElementById('page-transaksi');
+pageTransaksi.style.display = 'none';
+
+const authSection = document.getElementById('auth-section');
+const mainContent = document.getElementById('main-content');
+const userEmailSpan = document.getElementById('user-email');
 
 const formMaster = document.getElementById('form-master-barang');
 
@@ -216,9 +219,10 @@ async function renderMasterBarang() {
   if (data) {
     container.innerHTML = data.map(b => `
       <li>
+        <div><strong>${b.nama_barang}</strong> (${b.satuan})</div>
         <div>
-          <strong>${b.nama_barang}</strong> <br>
-          <small>Satuan: ${b.satuan}</small>
+          <button class="btn-edit" onclick="bukaEditBarang('${b.id}')">Edit</button>
+          <button class="btn-delete" onclick="hapusBarang('${b.id}')">Hapus</button>
         </div>
       </li>
     `).join('');
@@ -254,6 +258,7 @@ async function fetchPengadaan(query = '') {
         <strong>${item.barang?.nama_barang || 'Terhapus'}</strong> <br>
         <small>${item.jumlah} Unit - Tgl: ${item.tanggal_transaksi}</small>
       </div>
+      <button class="btn-edit" onclick="bukaEditTransaksi('${item.id}')">Edit</button>
       <button class="btn-delete" onclick="hapusData('${item.id}')">Hapus</button>
     </li>
   `).join('');
@@ -293,16 +298,84 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
-// 3. FUNGSI DELETE (Hapus Data)
+// Hapus Transaksi
 window.hapusData = async (id) => {
-  const { error } = await supabase
-    .from('pengadaan')
-    .delete()
-    .eq('id', id)
+  if (!confirm("Apakah Anda yakin ingin menghapus transaksi ini?")) return;
+  
+  const { error } = await supabase.from('pengadaan').delete().eq('id', id);
+  if (error) alert(error.message);
+  else fetchPengadaan();
+};
 
-  if (error) alert(error.message)
-  //selse fetchPengadaan()
+// Hapus Master Barang
+window.hapusBarang = async (id) => {
+  if (!confirm("Yakin hapus barang ini? Menghapus master barang akan gagal jika sudah ada transaksi terkait.")) return;
+  
+  const { error } = await supabase.from('barang').delete().eq('id', id);
+  if (error) alert("Gagal hapus: Barang mungkin sudah digunakan di data transaksi.");
+  //else fetchDaftarBarang();
+};
+
+window.bukaEditBarang = async (id) => {
+  const { data } = await supabase.from('barang').select('*').eq('id', id).single();
+  
+  const fields = document.getElementById('edit-fields');
+  document.getElementById('modal-title').innerText = "Edit Master Barang";
+  
+  fields.innerHTML = `
+    <input type="hidden" id="edit-id" value="${data.id}">
+    <input type="text" id="edit-nama" value="${data.nama_barang}" placeholder="Nama Barang">
+    <input type="text" id="edit-satuan" value="${data.satuan}" placeholder="Satuan">
+  `;
+  
+  document.getElementById('modal-edit').style.display = 'flex';
+  
+  // Submit handler khusus Edit Barang
+  document.getElementById('form-edit-global').onsubmit = async (e) => {
+    e.preventDefault();
+    const { error } = await supabase.from('barang').update({
+      nama_barang: document.getElementById('edit-nama').value,
+      satuan: document.getElementById('edit-satuan').value
+    }).eq('id', id);
+    
+    tutupModal();
+    fetchDaftarBarang();
+  };
+};
+
+window.bukaEditTransaksi = async (id) => {
+  const { data } = await supabase.from('pengadaan').select('*').eq('id', id).single();
+  
+  const fields = document.getElementById('edit-fields');
+  document.getElementById('modal-title').innerText = "Edit Transaksi";
+  
+  fields.innerHTML = `
+    <input type="hidden" id="edit-id" value="${data.id}">
+    <label>Jumlah:</label>
+    <input type="number" id="edit-jumlah" value="${data.jumlah}">
+    <label>Tanggal:</label>
+    <input type="date" id="edit-tanggal" value="${data.tanggal_transaksi}">
+  `;
+  
+  document.getElementById('modal-edit').style.display = 'flex';
+
+  document.getElementById('form-edit-global').onsubmit = async (e) => {
+    e.preventDefault();
+    const { error } = await supabase.from('pengadaan').update({
+      jumlah: document.getElementById('edit-jumlah').value,
+      tanggal_transaksi: document.getElementById('edit-tanggal').value
+    }).eq('id', id);
+    
+    tutupModal();
+    fetchPengadaan();
+  };
+};
+
+function tutupModal() {
+  document.getElementById('modal-edit').style.display = 'none';
 }
+
+document.getElementById('btn-tutup-modal').onclick = tutupModal;
 
 document.getElementById('btn-export').addEventListener('click', async () => {
   // 1. Ambil semua data
