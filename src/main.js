@@ -238,7 +238,7 @@ async function renderMasterBarang() {
       </li>
     `).join('');
 
-    document.getElementById('page-info-barang').innerText = `Halaman ${halBarang}`;
+    document.getElementById('page-info-barang').innerText = `Hal. ${halBarang}`;
     document.getElementById('prev-barang').disabled = (halBarang === 1);
     document.getElementById('next-barang').disabled = (ke >= count - 1);
   }
@@ -305,15 +305,16 @@ async function fetchPengadaan(query = '') {
     // Jika karena suatu hal barang_id tidak ada di master (benar-benar terhapus)
     const namaBarang = item.barang ? item.barang.nama_barang : '<span style="color:red;">Master Barang Hilang</span>';
     
+    // <small style="color: #94a3b8;">Oleh: ${item.admin_email || 'System'}</small> 
     return `
       <li>
         <div>
-          <strong>${namaBarang}</strong> <small style="color: #94a3b8;">Oleh: ${item.admin_email || 'System'}</small> <br>
+          <strong>${namaBarang}</strong><br>
           <small>${item.jumlah} Unit - Tgl: ${item.tanggal_transaksi}</small>
           
         </div>
         <div>
-          <button class="btn-print-single" onclick="cetakStruk('${item.id}')">🖨️</button>
+          <!--<button class="btn-print-single" onclick="cetakStruk('${item.id}')">🖨️</button>-->
           <button class="btn-edit" onclick="bukaEditTransaksi('${item.id}')">Edit</button>
           <button class="btn-delete" onclick="hapusData('${item.id}')">Hapus</button>
         </div>
@@ -322,7 +323,7 @@ async function fetchPengadaan(query = '') {
   }).join('');
 
   // Update Info Halaman
-  document.getElementById('page-info-transaksi').innerText = `Halaman ${halTransaksi}`;
+  document.getElementById('page-info-transaksi').innerText = `Hal. ${halTransaksi}`;
   
   // Atur tombol (disable jika di ujung data)
   document.getElementById('prev-transaksi').disabled = (halTransaksi === 1);
@@ -476,7 +477,7 @@ function tutupModal() {
 
 document.getElementById('btn-tutup-modal').onclick = tutupModal;
 
-document.getElementById('btn-export').addEventListener('click', async () => {
+/*document.getElementById('btn-export').addEventListener('click', async () => {
   // 1. Ambil semua data
   const { data, error } = await supabase
     .from('pengadaan')
@@ -490,13 +491,14 @@ document.getElementById('btn-export').addEventListener('click', async () => {
 
   csvContent += data.map(item => `${new Date(item.tanggal_transaksi).toLocaleDateString()};${item.barang?.nama_barang || 'Terhapus'};${item.jumlah};`).join('\n');
 
-  // 3. Masukkan data ke CSV
+  // 3. Masukkan data ke CSV */
+
 /*   data.forEach(item => {
     const row = `${new Date(item.tanggal_transaksi).toLocaleDateString()},${barang.nama_barang},${item.jumlah}\n`;
     csvContent += row;
   }); */
 
-  // 4. Proses Download
+  /* // 4. Proses Download
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -506,7 +508,7 @@ document.getElementById('btn-export').addEventListener('click', async () => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-});
+});*/
 
 async function updateDashboard() {
   // 1. Hitung Total Jenis Barang
@@ -541,12 +543,12 @@ menuSwitcher.addEventListener('change', (e) => {
   if (targetPage === 'page-dashboard') updateDashboard();
 });
 
-document.getElementById('btn-print').onclick = () => {
+/* document.getElementById('btn-print').onclick = () => {
   window.print();
-};
+}; */
 
 window.cetakStruk = async (id) => {
-  // 1. Ambil data lengkap transaksi tersebut
+  /* // 1. Ambil data lengkap transaksi tersebut
   const { data, error } = await supabase
     .from('pengadaan')
     .select('*, barang(nama_barang)')
@@ -564,7 +566,7 @@ window.cetakStruk = async (id) => {
   document.getElementById('s-waktu-cetak').innerText = new Date().toLocaleString();
 
   // 3. Panggil perintah cetak
-  window.print();
+  window.print(); */
 };
 
 // Jalankan saat pertama kali load
