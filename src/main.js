@@ -402,12 +402,17 @@ window.bukaEditBarang = async (id) => {
   document.getElementById('modal-title').innerText = "Edit Master Barang";
   
   fields.innerHTML = `
-    <input type="hidden" id="edit-id" value="${data.id}">
-    <label>Nama Barang:</label>
-    <input type="text" id="edit-nama" value="${data.nama_barang}" placeholder="Nama Barang"><br>
-    <label>Satuan:</label>
-    <input type="text" id="edit-satuan" value="${data.satuan}" placeholder="Satuan">
+    <div class="modal-form-group">
+      <label>Nama Barang</label>
+      <input type="text" id="edit-nama" value="${data.nama_barang}">
+    </div>
+    <div class="modal-form-group">
+      <label>Satuan</label>
+      <input type="text" id="edit-satuan" value="${data.satuan}">
+    </div>
   `;
+
+  
   
   document.getElementById('modal-edit').style.display = 'flex';
   
@@ -432,10 +437,14 @@ window.bukaEditTransaksi = async (id) => {
   
   fields.innerHTML = `
     <input type="hidden" id="edit-id" value="${data.id}">
-    <label>Jumlah:</label>
-    <input type="number" id="edit-jumlah" value="${data.jumlah}"><br>
-    <label>Tanggal:</label>
-    <input type="date" id="edit-tanggal" value="${data.tanggal_transaksi}">
+    <div class="modal-form-group">
+      <label>Jumlah</label>
+      <input type="number" id="edit-jumlah" value="${data.jumlah}">
+    </div>
+    <div class="modal-form-group">
+      <label>Tanggal</label>
+      <input type="date" id="edit-tanggal" value="${data.tanggal_transaksi}">
+    </div>
   `;
   
   document.getElementById('modal-edit').style.display = 'flex';

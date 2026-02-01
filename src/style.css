@@ -428,3 +428,33 @@ hr {
 #btn-reset-filter {
   height: 35px; /* Biar sejajar dengan input */
 }
+
+/* Gaya untuk grup input di dalam modal */
+.modal-form-group {
+  display: flex;
+  flex-direction: column; /* Mobile: Tumpuk */
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.modal-form-group label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #475569;
+  margin-bottom: 5px;
+}
+
+/* Desktop: Label dan Input Sejajar */
+@media (min-width: 480px) {
+  .modal-form-group {
+    flex-direction: row;
+    align-items: center;
+  }
+  .modal-form-group label {
+    width: 120px; /* Lebar label tetap */
+    margin-bottom: 0;
+  }
+  .modal-form-group input {
+    flex: 1;
+  }
+}
