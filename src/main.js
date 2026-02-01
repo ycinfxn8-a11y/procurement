@@ -308,8 +308,9 @@ async function fetchPengadaan(query = '') {
     return `
       <li>
         <div>
-          <strong>${namaBarang}</strong> <br>
+          <strong>${namaBarang}</strong> <small style="color: #94a3b8;">Oleh: ${item.admin_email || 'System'}</small> <br>
           <small>${item.jumlah} Unit - Tgl: ${item.tanggal_transaksi}</small>
+          
         </div>
         <div>
           <button class="btn-print-single" onclick="cetakStruk('${item.id}')">🖨️</button>
@@ -353,6 +354,11 @@ searchInput.addEventListener('input', (e) => {
 // 2. FUNGSI CREATE (Tambah Data)
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  const emailAdmin = user.email;
+  // const displayName = data.user.user_metadata.display_name;
+
   if (!selectedBarangId) return alert("Pilih barang terlebih dahulu!");
 
   const jumlah = document.getElementById('jumlah').value;
@@ -367,7 +373,8 @@ form.addEventListener('submit', async (e) => {
     .insert([{ 
       barang_id: selectedBarangId, 
       jumlah, 
-      tanggal_transaksi 
+      tanggal_transaksi,
+      admin_email: emailAdmin
     }]);
 
   if (error) alert(error.message);
@@ -375,6 +382,7 @@ form.addEventListener('submit', async (e) => {
     form.reset();
     btnBersihkan.click(); // Reset pilihan barang
     fetchPengadaan();
+    updateDashboard();
   }
 });
 
@@ -550,6 +558,7 @@ window.cetakStruk = async (id) => {
   // 2. Isi data ke elemen struk
   document.getElementById('s-id').innerText = data.id; //.substring(0, 8).toUpperCase();
   document.getElementById('s-tanggal').innerText = data.tanggal_transaksi;
+  document.getElementById('s-admin').innerText = data.admin_email || 'N/A';
   document.getElementById('s-nama').innerText = data.barang.nama_barang;
   document.getElementById('s-jumlah').innerText = data.jumlah + " Unit";
   document.getElementById('s-waktu-cetak').innerText = new Date().toLocaleString();
