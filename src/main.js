@@ -217,8 +217,15 @@ const list = document.getElementById('daftar-pengadaan')
 } */
 
 async function renderMasterBarang() {
-  const { data } = await supabase.from('barang').select('*').order('nama_barang');
   const container = document.getElementById('list-master-barang');
+  const dari = (halBarang - 1) * LIMIT;
+  const ke = dari + LIMIT - 1;
+
+  const { data, count } = await supabase
+    .from('barang')
+    .select('*', { count: 'exact' })
+    .order('nama_barang')
+    .range(dari, ke);
   
   if (data) {
     container.innerHTML = data.map(b => `
@@ -230,30 +237,45 @@ async function renderMasterBarang() {
         </div>
       </li>
     `).join('');
+
+    document.getElementById('page-info-barang').innerText = `Halaman ${halBarang}`;
+    document.getElementById('prev-barang').disabled = (halBarang === 1);
+    document.getElementById('next-barang').disabled = (ke >= count - 1);
   }
 }
+
+// Event Listener Tombol Barang
+document.getElementById('prev-barang').onclick = () => { halBarang--; renderMasterBarang(); };
+document.getElementById('next-barang').onclick = () => { halBarang++; renderMasterBarang(); };
 
 // Panggil fungsi ini di dalam event listener menuSwitcher jika targetPage === 'page-barang'
 
 // 1. FUNGSI READ (Ambil Data)
 // const searchInput = document.getElementById('search-input');
 
+let halTransaksi = 1;
+let halBarang = 1;
+const LIMIT = 5; // Maksimal 5 item
+
 // 1. Modifikasi Fungsi Fetch agar mendukung filter
 async function fetchPengadaan(query = '') {
   list.innerHTML = '<li>Memuat...</li>';
+  
+  // Hitung range data
+  const dari = (halTransaksi - 1) * LIMIT;
+  const ke = dari + LIMIT - 1;
 
-  // Perhatikan format select: '*, barang(nama_barang)' ini adalah JOIN
   let request = supabase
     .from('pengadaan')
-    .select('*, barang(nama_barang)') 
-    .order('tanggal_transaksi', { ascending: false });
+    .select('*, barang(nama_barang)', { count: 'exact' }) // Ambil 'count' untuk total data
+    .order('tanggal_transaksi', { ascending: false })
+    .range(dari, ke); // AMBIL DATA SESUAI RANGE
 
   if (query) {
-    // Cari berdasarkan nama barang di tabel relasi
     request = request.ilike('barang.nama_barang', `%${query}%`);
   }
 
-  const { data, error } = await request;
+  const { data, count, error } = await request;
   if (error) return console.error(error);
 
   list.innerHTML = data.map(item => `
@@ -266,7 +288,18 @@ async function fetchPengadaan(query = '') {
       <button class="btn-delete" onclick="hapusData('${item.id}')">Hapus</button>
     </li>
   `).join('');
+
+  // Update Info Halaman
+  document.getElementById('page-info-transaksi').innerText = `Halaman ${halTransaksi}`;
+  
+  // Atur tombol (disable jika di ujung data)
+  document.getElementById('prev-transaksi').disabled = (halTransaksi === 1);
+  document.getElementById('next-transaksi').disabled = (ke >= count - 1);
 }
+
+// Event Listener Tombol Transaksi
+document.getElementById('prev-transaksi').onclick = () => { halTransaksi--; fetchPengadaan(); };
+document.getElementById('next-transaksi').onclick = () => { halTransaksi++; fetchPengadaan(); };
 
 // 2. Tambahkan Event Listener untuk Pencarian
 /* searchInput.addEventListener('input', (e) => {
@@ -328,7 +361,9 @@ window.bukaEditBarang = async (id) => {
   
   fields.innerHTML = `
     <input type="hidden" id="edit-id" value="${data.id}">
-    <input type="text" id="edit-nama" value="${data.nama_barang}" placeholder="Nama Barang">
+    <label>Nama Barang:</label>
+    <input type="text" id="edit-nama" value="${data.nama_barang}" placeholder="Nama Barang"><br>
+    <label>Satuan:</label>
     <input type="text" id="edit-satuan" value="${data.satuan}" placeholder="Satuan">
   `;
   
@@ -356,7 +391,7 @@ window.bukaEditTransaksi = async (id) => {
   fields.innerHTML = `
     <input type="hidden" id="edit-id" value="${data.id}">
     <label>Jumlah:</label>
-    <input type="number" id="edit-jumlah" value="${data.jumlah}">
+    <input type="number" id="edit-jumlah" value="${data.jumlah}"><br>
     <label>Tanggal:</label>
     <input type="date" id="edit-tanggal" value="${data.tanggal_transaksi}">
   `;

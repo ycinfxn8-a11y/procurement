@@ -361,3 +361,36 @@ hr {
   padding: 5px 10px;
   margin-right: 5px;
 }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+  padding: 10px 0;
+}
+
+.btn-page {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-page:hover:not(:disabled) {
+  background-color: #e2e8f0;
+}
+
+.btn-page:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f8fafc;
+}
+
+#page-info-transaksi, #page-info-barang {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+}
