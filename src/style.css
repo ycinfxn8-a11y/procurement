@@ -508,3 +508,48 @@ hr {
     break-inside: avoid;
   }
 }
+
+/* Tampilan di layar: Sembunyikan area struk */
+#struk-area {
+  display: none;
+}
+
+/* Tombol struk */
+.btn-print-single {
+  background-color: #6366f1;
+  font-size: 0.75rem;
+  padding: 5px 10px;
+}
+
+/* LOGIKA CETAK */
+@media print {
+  /* Jika sedang cetak struk (kita bisa mendeteksi lewat elemen) */
+  body * {
+    visibility: hidden;
+  }
+  
+  #struk-area, #struk-area * {
+    visibility: visible;
+  }
+
+  #struk-area {
+    display: block !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80mm; /* Lebar standar struk thermal */
+    padding: 10px;
+    font-family: 'Courier New', Courier, monospace;
+    color: black;
+  }
+
+  .dashed {
+    border: none;
+    border-top: 1px dashed #000;
+    margin: 10px 0;
+  }
+
+  .struk-header, .struk-footer { text-align: center; }
+  .struk-row { display: flex; justify-content: space-between; margin: 5px 0; }
+  .struk-header h2 { font-size: 1.1rem; margin-bottom: 5px; }
+}

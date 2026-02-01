@@ -312,6 +312,7 @@ async function fetchPengadaan(query = '') {
           <small>${item.jumlah} Unit - Tgl: ${item.tanggal_transaksi}</small>
         </div>
         <div>
+          <button class="btn-print-single" onclick="cetakStruk('${item.id}')">🖨️</button>
           <button class="btn-edit" onclick="bukaEditTransaksi('${item.id}')">Edit</button>
           <button class="btn-delete" onclick="hapusData('${item.id}')">Hapus</button>
         </div>
@@ -533,6 +534,27 @@ menuSwitcher.addEventListener('change', (e) => {
 });
 
 document.getElementById('btn-print').onclick = () => {
+  window.print();
+};
+
+window.cetakStruk = async (id) => {
+  // 1. Ambil data lengkap transaksi tersebut
+  const { data, error } = await supabase
+    .from('pengadaan')
+    .select('*, barang(nama_barang)')
+    .eq('id', id)
+    .single();
+
+  if (error) return alert("Gagal mengambil data struk");
+
+  // 2. Isi data ke elemen struk
+  document.getElementById('s-id').innerText = data.id; //.substring(0, 8).toUpperCase();
+  document.getElementById('s-tanggal').innerText = data.tanggal_transaksi;
+  document.getElementById('s-nama').innerText = data.barang.nama_barang;
+  document.getElementById('s-jumlah').innerText = data.jumlah + " Unit";
+  document.getElementById('s-waktu-cetak').innerText = new Date().toLocaleString();
+
+  // 3. Panggil perintah cetak
   window.print();
 };
 
