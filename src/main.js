@@ -162,17 +162,21 @@ const channel = supabase
 // --- LOGIKA AUTENTIKASI ---
 
 // 1. Cek Status Login (Otomatis)
+const appElement = document.getElementById('app');
 supabase.auth.onAuthStateChange((event, session) => {
   if (session) {
     // User login
     authSection.style.display = 'none'
     mainContent.style.display = 'block'
+    appElement.classList.add('wide'); // Tambah class wide
     userEmailSpan.innerText = `Halo, ${session.user.email}`
-    fetchPengadaan() // Ambil data saat login
+    updateDashboard();
+    //fetchPengadaan() // Ambil data saat login
   } else {
-    // User logout
+    // User logout: Tampilkan login dan ciutkan box
     authSection.style.display = 'block'
     mainContent.style.display = 'none'
+    appElement.classList.remove('wide'); // Hapus class wide
   }
 })
 

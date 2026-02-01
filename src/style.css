@@ -15,15 +15,18 @@ body {
   justify-content: center;
   /* padding: 40px 20px; */
   padding: 20px;
+
+  margin: 0 auto;
 }
 
 #app {
   width: 100%;
-  /* max-width: 450px; */
+  max-width: 450px;
   background: var(--card-bg);
   padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  transition: max-width 0.3s ease; /* Transisi halus saat melebar */
 }
 
 /* --- Tampilan Default (Mobile) --- */
@@ -33,15 +36,18 @@ body {
   gap: 20px;
 }
 
-#app {
-  max-width: 100%; /* Agar lebih lebar di desktop */
-  margin: 0 auto;
+/* Class tambahan untuk Dashboard & Transaksi */
+#app.wide {
+  max-width: 1000px;
 }
 
 /* --- Tampilan Desktop (Layar > 768px) --- */
 @media (min-width: 768px) {
-  #app {
-    max-width: 1000px; /* Perlebar kontainer utama */
+  #app.wide .main-layout {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    align-items: start;
+    gap: 30px;
   }
 
   .main-layout {
@@ -55,6 +61,10 @@ body {
     position: sticky; /* Form tetap terlihat saat list di-scroll */
     top: 20px;
   }
+}
+
+#auth-section {
+  max-width: 450px;
 }
 
 /* Tambahan agar list lebih rapi */
