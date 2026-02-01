@@ -458,3 +458,53 @@ hr {
     flex: 1;
   }
 }
+
+@media print {
+  /* Sembunyikan semua elemen UI yang tidak perlu */
+  .nav-container, 
+  .form-container, 
+  .filter-container, 
+  .pagination, 
+  .actions, 
+  .btn-edit, 
+  .btn-delete, 
+  #modal-edit,
+  hr {
+    display: none !important;
+  }
+
+  /* Rapikan layout utama */
+  body {
+    background: white;
+    padding: 0;
+  }
+  
+  #app.wide {
+    max-width: 100%;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .content-page {
+    display: block !important;
+  }
+
+  /* Buat judul laporan muncul hanya saat diprint */
+  .list-container::before {
+    content: "LAPORAN TRANSAKSI PENGADAAN BARANG";
+    display: block;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    border-bottom: 2px solid black;
+    padding-bottom: 10px;
+  }
+
+  /* Ubah list menjadi tampilan yang lebih kaku/rapi */
+  ul li {
+    border: 1px solid #ddd;
+    margin-bottom: -1px;
+    break-inside: avoid;
+  }
+}

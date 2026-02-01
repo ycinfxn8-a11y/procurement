@@ -532,6 +532,10 @@ menuSwitcher.addEventListener('change', (e) => {
   if (targetPage === 'page-dashboard') updateDashboard();
 });
 
+document.getElementById('btn-print').onclick = () => {
+  window.print();
+};
+
 // Jalankan saat pertama kali load
 updateDashboard();
 
