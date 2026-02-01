@@ -57,49 +57,59 @@
 
         <section id="page-transaksi" class="content-page">
           <h2>Daftar Pengadaan</h2>
-          <div class="actions">
-            <button id="btn-export" class="btn-secondary">Export ke Excel/CSV</button>
-          </div>
-          <div class="card-section">
-            <form id="form-pengadaan">
-                <div id="pencarian-barang-container">
-                  <label>Cari Barang:</label>
-                  
-                  <div id="area-cari">
-                    <input type="text" id="input-cari-barang" placeholder="Ketik nama barang...">
-                    <ul id="hasil-cari-barang" class="dropdown-results"></ul>
+          <div class="main-layout">
+            <div class="form-container">
+              <div class="card-section">
+                <form id="form-pengadaan">
+                  <div id="pencarian-barang-container">
+                    <label>Cari Barang:</label>
+                    
+                    <div id="area-cari">
+                      <input type="text" id="input-cari-barang" placeholder="Ketik nama barang...">
+                      <ul id="hasil-cari-barang" class="dropdown-results"></ul>
+                    </div>
+
+                    <div id="display-pilihan-barang" style="display: none;" class="selected-box">
+                      <span id="nama-barang-terpilih"></span>
+                      <button type="button" id="btn-bersihkan-pilihan" class="btn-small-outline">Bersihkan Pilihan</button>
+                    </div>
                   </div>
 
-                  <div id="display-pilihan-barang" style="display: none;" class="selected-box">
-                    <span id="nama-barang-terpilih"></span>
-                    <button type="button" id="btn-bersihkan-pilihan" class="btn-small-outline">Bersihkan Pilihan</button>
-                  </div>
-                </div>
+                  <input type="number" id="jumlah" placeholder="Jumlah" required>
+                  <input type="date" id="tanggal_transaksi" required>
+                  <button type="submit" id="btn-submit-pengadaan" disabled>Tambah Pengadaan</button>
+                </form>
+              </div>
+            </div>
 
-                <input type="number" id="jumlah" placeholder="Jumlah" required>
-                <input type="date" id="tanggal_transaksi" required>
-                <button type="submit" id="btn-submit-pengadaan" disabled>Tambah Pengadaan</button>
-                <!-- <input type="number" id="jumlah" placeholder="Jumlah" required> -->
-                <!-- <input type="date" id="tanggal_transaksi" required> -->
-                <!-- <button type="submit">Tambah Pengadaan</button> -->
-              </form>
+            <div class="list-container">
+<!--               <div class="search-container">
+                <input type="text" id="search-input" placeholder="Cari transaksi...">
+              </div> -->
+              <div class="actions">
+                <button id="btn-export" class="btn-secondary">Export CSV</button>
+              </div>
+              <ul id="daftar-pengadaan"></ul>
+            </div>
           </div>
-<!--           <div class="search-container">
-            <input type="text" id="search-input" placeholder="Cari transaksi...">
-          </div> -->
-          <ul id="daftar-pengadaan"></ul>
         </section>
 
         <section id="page-barang" class="content-page" style="display: none;">
           <h2>Manajemen Barang</h2>
-          <div class="card-section">
-            <form id="form-master-barang">
-                <input type="text" id="master-nama" placeholder="Nama Barang (contoh: Laptop)" required>
-                <input type="text" id="master-satuan" placeholder="Satuan (contoh: Unit/Pcs)" required>
-                <button type="submit" class="btn-green">Simpan Barang</button>
-            </form>
+          <div class="main-layout">
+            <div class="form-container">
+              <div class="card-section">
+                <form id="form-master-barang">
+                    <input type="text" id="master-nama" placeholder="Nama Barang (contoh: Laptop)" required>
+                    <input type="text" id="master-satuan" placeholder="Satuan (contoh: Unit/Pcs)" required>
+                    <button type="submit" class="btn-green">Simpan Barang</button>
+                </form>
+              </div>
+            </div>
+            <div class="list-container">
+              <ul id="list-master-barang"></ul>
+            </div>
           </div>
-          <ul id="list-master-barang"></ul>
         </section>
 
       </div>

@@ -13,16 +13,59 @@ body {
   color: var(--text);
   display: flex;
   justify-content: center;
-  padding: 40px 20px;
+  /* padding: 40px 20px; */
+  padding: 20px;
 }
 
 #app {
   width: 100%;
-  max-width: 450px;
+  /* max-width: 450px; */
   background: var(--card-bg);
   padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Tampilan Default (Mobile) --- */
+.main-layout {
+  display: flex;
+  flex-direction: column; /* Menumpuk ke bawah */
+  gap: 20px;
+}
+
+#app {
+  max-width: 100%; /* Agar lebih lebar di desktop */
+  margin: 0 auto;
+}
+
+/* --- Tampilan Desktop (Layar > 768px) --- */
+@media (min-width: 768px) {
+  #app {
+    max-width: 1000px; /* Perlebar kontainer utama */
+  }
+
+  .main-layout {
+    display: grid;
+    grid-template-columns: 350px 1fr; /* Kiri 350px, Kanan sisa ruang */
+    align-items: start;
+    gap: 30px;
+  }
+
+  .form-container {
+    position: sticky; /* Form tetap terlihat saat list di-scroll */
+    top: 20px;
+  }
+}
+
+/* Tambahan agar list lebih rapi */
+.list-container {
+  min-width: 0; /* Mencegah konten meluap di grid */
+}
+
+#daftar-pengadaan, #list-master-barang {
+  max-height: 70vh; /* Batasi tinggi list agar tidak terlalu panjang */
+  overflow-y: auto; /* Tambahkan scroll jika list banyak */
+  padding-right: 5px;
 }
 
 h1, h2 { text-align: center; margin-bottom: 1.5rem; }
