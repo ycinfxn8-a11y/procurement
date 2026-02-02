@@ -402,7 +402,7 @@ window.hapusBarang = async (id) => {
   
   const { error } = await supabase.from('barang').delete().eq('id', id);
   if (error) alert("Gagal hapus: Barang mungkin sudah digunakan di data transaksi.");
-  //else fetchDaftarBarang();
+  else renderMasterBarang();
 };
 
 window.bukaEditBarang = async (id) => {
@@ -435,7 +435,8 @@ window.bukaEditBarang = async (id) => {
     }).eq('id', id);
     
     tutupModal();
-    fetchDaftarBarang();
+    renderMasterBarang();
+    //fetchDaftarBarang();
   };
 };
 
