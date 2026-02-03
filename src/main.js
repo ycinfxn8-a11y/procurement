@@ -32,6 +32,8 @@ menuSwitcher.addEventListener('change', (e) => {
     // fetchDaftarBarang(); 
     renderMasterBarang();
   }
+  if (targetPage === 'page-penyedia') renderMasterPenyedia();
+  if (targetPage === 'page-pbf') renderMasterPBF();
 });
 
 // Element UI
@@ -43,6 +45,8 @@ const mainContent = document.getElementById('main-content');
 const userEmailSpan = document.getElementById('user-email');
 
 const formMaster = document.getElementById('form-master-barang');
+const formPenyedia = document.getElementById('form-master-penyedia');
+const formPBF = document.getElementById('form-master-pbf');
 
 
 
@@ -126,6 +130,42 @@ formMaster.addEventListener('submit', async (e) => {
     formMaster.reset();
     // fetchDaftarBarang(); // Refresh isi dropdown agar barang baru muncul
     renderMasterBarang();
+  }
+});
+
+// Simpan Master Penyedia Baru
+formPenyedia.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const nama_penyedia = document.getElementById('nama-penyedia').value;
+
+  const { error } = await supabase
+    .from('penyedia')
+    .insert([{ nama_penyedia }]);
+
+  if (error) {
+    alert("Error: " + error.message);
+  } else {
+    alert("Penyedia berhasil ditambahkan!");
+    formPenyedia.reset();
+    renderMasterPenyedia();
+  }
+});
+
+// Simpan Master PBF Baru
+formPBF.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const nama_pbf = document.getElementById('nama-pbf').value;
+
+  const { error } = await supabase
+    .from('pbf')
+    .insert([{ nama_pbf }]);
+
+  if (error) {
+    alert("Error: " + error.message);
+  } else {
+    alert("PBF berhasil ditambahkan!");
+    formPBF.reset();
+    renderMasterPBF();
   }
 });
 
@@ -274,9 +314,9 @@ async function fetchPengadaan(query = '') {
   const dari = (halTransaksi - 1) * LIMIT;
   const ke = dari + LIMIT - 1;
 
-  let selectQuery = '*, barang(nama_barang)';
+  let selectQuery = '*, barang(nama_barang), penyedia(nama_penyedia), pbf(nama_pbf)';
   if (querySearch) {
-    selectQuery = '*, barang!inner(nama_barang)';
+    selectQuery = '*, barang!inner(nama_barang), penyedia!inner(nama_penyedia), pbf!inner(nama_pbf)';
   }
 
   let request = supabase
@@ -301,26 +341,23 @@ async function fetchPengadaan(query = '') {
   const { data, count, error } = await request;
   if (error) return console.error(error);
 
-  list.innerHTML = data.map(item => {
-    // Jika karena suatu hal barang_id tidak ada di master (benar-benar terhapus)
-    const namaBarang = item.barang ? item.barang.nama_barang : '<span style="color:red;">Master Barang Hilang</span>';
-    
-    // <small style="color: #94a3b8;">Oleh: ${item.admin_email || 'System'}</small> 
-    return `
+  if (data) {
+    list.innerHTML = data.map(item => `
       <li>
-        <div>
-          <strong>${namaBarang}</strong><br>
-          <small>${item.jumlah} Unit - Tgl: ${item.tanggal_transaksi}</small>
-          
+        <div style="flex-grow:1">
+          <strong>${item.barang?.nama_barang}</strong> <br>
+          <small>Penyedia: ${item.penyedia?.nama_penyedia || '-'} | PBF: ${item.pbf?.nama_pbf || '-'}</small> <br>
+          <small>Harga: Rp${item.harga_barang.toLocaleString()} x ${item.jumlah} Unit</small>
         </div>
-        <div>
+        <div style="text-align:right">
+          <strong>Total: Rp${(item.harga_barang * item.jumlah).toLocaleString()}</strong> <br>
           <!--<button class="btn-print-single" onclick="cetakStruk('${item.id}')">🖨️</button>-->
           <button class="btn-edit" onclick="bukaEditTransaksi('${item.id}')">Edit</button>
           <button class="btn-delete" onclick="hapusData('${item.id}')">Hapus</button>
         </div>
       </li>
-    `;
-  }).join('');
+    `).join('');
+  }  
 
   // Update Info Halaman
   document.getElementById('page-info-transaksi').innerText = `Hal. ${halTransaksi}`;
@@ -363,11 +400,14 @@ form.addEventListener('submit', async (e) => {
   if (!selectedBarangId) return alert("Pilih barang terlebih dahulu!");
 
   const jumlah = document.getElementById('jumlah').value;
-  if (jumlah <= 0) {
+/*   if (jumlah <= 0) {
     alert("Jumlah barang harus lebih dari 0!");
     return;
-  }
+  } */
   const tanggal_transaksi = document.getElementById('tanggal_transaksi').value;
+  const penyedia = document.getElementById('select-penyedia').value;
+  const pbf = document.getElementById('select-pbf').value;
+  const harga_barang = document.getElementById('harga_barang').value;
 
   const { error } = await supabase
     .from('pengadaan')
@@ -375,13 +415,21 @@ form.addEventListener('submit', async (e) => {
       barang_id: selectedBarangId, 
       jumlah, 
       tanggal_transaksi,
-      admin_email: emailAdmin
+      penyedia_id: penyedia,
+      pbf_id: pbf,
+      harga_barang
+      // admin_email: emailAdmin
     }]);
 
   if (error) alert(error.message);
   else {
     form.reset();
     btnBersihkan.click(); // Reset pilihan barang
+
+    document.getElementById('tab-1').checked = true;
+    // Picu event change manual agar section 1 tampil kembali
+    document.getElementById('tab-1').dispatchEvent(new Event('change'));
+
     fetchPengadaan();
     updateDashboard();
   }
@@ -421,8 +469,6 @@ window.bukaEditBarang = async (id) => {
       <input type="text" id="edit-satuan" value="${data.satuan}">
     </div>
   `;
-
-  
   
   document.getElementById('modal-edit').style.display = 'flex';
   
@@ -512,35 +558,43 @@ document.getElementById('btn-tutup-modal').onclick = tutupModal;
 });*/
 
 async function updateDashboard() {
-  // 1. Hitung Total Jenis Barang
+  // 1. Ambil data harga dan jumlah untuk hitung total biaya
+  const { data: allData, error } = await supabase
+    .from('pengadaan')
+    .select('harga_barang, jumlah, tanggal_transaksi');
+
+  if (error) return console.error(error);
+
+  // 2. Hitung Total Pengeluaran (Sum of Price * Quantity)
+  const totalBiaya = allData.reduce((acc, curr) => {
+    return acc + (Number(curr.harga_barang) * Number(curr.jumlah));
+  }, 0);
+
+  // 3. Hitung Total Unit Masuk
+  const totalUnit = allData.reduce((acc, curr) => acc + Number(curr.jumlah), 0);
+
+  // 4. Hitung Transaksi Hari Ini
+  const hariIni = new Date().toISOString().split('T')[0];
+  const transaksiHariIni = allData.filter(item => item.tanggal_transaksi === hariIni).length;
+
+  // 5. Hitung Total Jenis Barang (Master)
   const { count: countBarang } = await supabase
     .from('barang')
     .select('*', { count: 'exact', head: true });
 
-  // 2. Hitung Total Unit (Sum dari kolom jumlah)
-  const { data: dataUnit } = await supabase
-    .from('pengadaan')
-    .select('jumlah');
-  const totalUnit = dataUnit?.reduce((acc, curr) => acc + curr.jumlah, 0) || 0;
-
-  // 3. Hitung Transaksi Hari Ini
-  const hariIni = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
-  const { count: countHariIni } = await supabase
-    .from('pengadaan')
-    .select('*', { count: 'exact', head: true })
-    .eq('tanggal_transaksi', hariIni);
-
-  // Update UI
-  document.getElementById('stat-total-barang').innerText = countBarang || 0;
+  // UPDATE UI dengan format Rupiah
+  document.getElementById('stat-total-biaya').innerText = `Rp ${totalBiaya.toLocaleString('id-ID')}`;
   document.getElementById('stat-total-unit').innerText = totalUnit;
-  document.getElementById('stat-transaksi-hari-ini').innerText = countHariIni || 0;
+  document.getElementById('stat-total-barang').innerText = countBarang || 0;
+  document.getElementById('stat-transaksi-hari-ini').innerText = transaksiHariIni;
+
 }
 
 // Tambahkan updateDashboard() ke dalam switcher menu
 menuSwitcher.addEventListener('change', (e) => {
   const targetPage = e.target.value;
-  // ... logika display block/none yang sudah ada ...
-  
+
+  fetchDropdownData()
   if (targetPage === 'page-dashboard') updateDashboard();
 });
 
@@ -570,9 +624,238 @@ window.cetakStruk = async (id) => {
   window.print(); */
 };
 
-// Jalankan saat pertama kali load
-updateDashboard();
+async function fetchDropdownData() {
+  const { data: pnd } = await supabase.from('penyedia').select('*').order('nama_penyedia');
+  const { data: pbf } = await supabase.from('pbf').select('*').order('nama_pbf');
+
+  if (pnd) {
+    document.getElementById('select-penyedia').innerHTML = 
+      '<option value="">-- Pilih Penyedia --</option>' + 
+      pnd.map(p => `<option value="${p.id}">${p.nama_penyedia}</option>`).join('');
+  }
+  if (pbf) {
+    document.getElementById('select-pbf').innerHTML = 
+      '<option value="">-- Pilih PBF --</option>' + 
+      pbf.map(p => `<option value="${p.id}">${p.nama_pbf}</option>`).join('');
+  }
+}
+
+async function renderMasterPenyedia() {
+  const { data } = await supabase.from('penyedia').select('*').order('nama_penyedia');
+  const listPnd = document.getElementById('list-master-penyedia');
+  listPnd.innerHTML = data.map(p => `
+    <li>
+      <span>${p.nama_penyedia}</span>
+      <div>
+        <button class="btn-edit" onclick="bukaEditPenyedia('${p.id}', '${p.nama_penyedia}')">Edit</button>
+        <button class="btn-delete" onclick="hapusPenyedia('${p.id}')">Hapus</button>
+      </div>
+    </li>
+  `).join('');
+}
+
+window.bukaEditPenyedia = async (id) => {
+  const { data } = await supabase.from('penyedia').select('*').eq('id', id).single();
+  
+  const fields = document.getElementById('edit-fields');
+  document.getElementById('modal-title').innerText = "Edit Master Penyedia";
+  
+  fields.innerHTML = `
+    <div class="modal-form-group">
+      <label>Nama Penyedia</label>
+      <input type="text" id="edit-nama" value="${data.nama_penyedia}">
+    </div>
+  `;
+  
+  document.getElementById('modal-edit').style.display = 'flex';
+  
+  document.getElementById('form-edit-global').onsubmit = async (e) => {
+    e.preventDefault();
+    const { error } = await supabase.from('penyedia').update({
+      nama_penyedia: document.getElementById('edit-nama').value
+    }).eq('id', id);
+    
+    tutupModal();
+    renderMasterPenyedia();
+    //fetchDaftarBarang();
+  };
+};
+
+window.hapusPenyedia = async (id) => {
+  if (!confirm("Hapus penyedia ini?")) return;
+  await supabase.from('penyedia').delete().eq('id', id);
+  renderMasterPenyedia();
+  fetchDropdownData();
+};
+
+async function renderMasterPBF() {
+  const { data } = await supabase.from('pbf').select('*').order('nama_pbf');
+  const listPbf = document.getElementById('list-master-pbf');
+  listPbf.innerHTML = data.map(p => `
+    <li>
+      <span>${p.nama_pbf}</span>
+      <div>
+        <button class="btn-edit" onclick="bukaEditPBF('${p.id}', '${p.nama_pbf}')">Edit</button>
+        <button class="btn-delete" onclick="hapusPBF('${p.id}')">Hapus</button>
+      </div>
+    </li>
+  `).join('');
+}
+
+window.bukaEditPBF = async (id) => {
+  const { data } = await supabase.from('pbf').select('*').eq('id', id).single();
+  
+  const fields = document.getElementById('edit-fields');
+  document.getElementById('modal-title').innerText = "Edit Master PBF";
+  
+  fields.innerHTML = `
+    <div class="modal-form-group">
+      <label>Nama PBF</label>
+      <input type="text" id="edit-nama" value="${data.nama_pbf}">
+    </div>
+  `;
+  
+  document.getElementById('modal-edit').style.display = 'flex';
+  
+  document.getElementById('form-edit-global').onsubmit = async (e) => {
+    e.preventDefault();
+    const { error } = await supabase.from('pbf').update({
+      nama_pbf: document.getElementById('edit-nama').value
+    }).eq('id', id);
+    
+    tutupModal();
+    renderMasterPBF();
+  };
+};
+
+window.hapusPBF = async (id) => {
+  if (!confirm("Hapus PBF ini?")) return;
+  await supabase.from('pbf').delete().eq('id', id);
+  renderMasterPBF();
+  fetchDropdownData();
+};
+
+const radioTabs = document.querySelectorAll('input[name="section-tab"]');
+const tabContents = document.querySelectorAll('.tab-content');
+
+radioTabs.forEach(radio => {
+  radio.addEventListener('change', (e) => {
+    const targetId = e.target.value;
+
+    tabContents.forEach(content => {
+      if (content.id === targetId) {
+        content.style.display = 'block';
+      } else {
+        content.style.display = 'none';
+      }
+    });
+  });
+});
+
+window.bukaModalExport = async () => {
+  // Ambil data dropdown terbaru untuk filter
+  const { data: pnd } = await supabase.from('penyedia').select('*').order('nama_penyedia');
+  const { data: pbf } = await supabase.from('pbf').select('*').order('nama_pbf');
+
+  // Isi Select Penyedia di Modal Export
+  const selectPnd = document.getElementById('export-penyedia');
+  selectPnd.innerHTML = '<option value="">-- Semua Penyedia --</option>' + 
+    (pnd ? pnd.map(p => `<option value="${p.id}">${p.nama_penyedia}</option>`).join('') : '');
+
+  // Isi Select PBF di Modal Export
+  const selectPbf = document.getElementById('export-pbf');
+  selectPbf.innerHTML = '<option value="">-- Semua PBF --</option>' + 
+    (pbf ? pbf.map(p => `<option value="${p.id}">${p.nama_pbf}</option>`).join('') : '');
+
+  document.getElementById('modal-export').style.display = 'flex';
+};
+
+window.tutupModalExport = () => {
+  document.getElementById('modal-export').style.display = 'none';
+};
+
+// 2. Fungsi Proses Download CSV
+document.getElementById('form-export-csv').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const startDate = document.getElementById('export-start-date').value;
+  const endDate = document.getElementById('export-end-date').value;
+  const penyediaId = document.getElementById('export-penyedia').value;
+  const pbfId = document.getElementById('export-pbf').value;
+
+  const btnSubmit = e.target.querySelector('button[type="submit"]');
+  btnSubmit.innerText = "Sedang Mengunduh...";
+  btnSubmit.disabled = true;
+
+  try {
+    // Bangun Query Supabase
+    let query = supabase
+      .from('pengadaan')
+      .select('*, barang(nama_barang, satuan), penyedia(nama_penyedia), pbf(nama_pbf)')
+      .order('tanggal_transaksi', { ascending: false });
+
+    // Terapkan Filter jika diisi
+    if (startDate) query = query.gte('tanggal_transaksi', startDate);
+    if (endDate) query = query.lte('tanggal_transaksi', endDate);
+    if (penyediaId) query = query.eq('penyedia_id', penyediaId);
+    if (pbfId) query = query.eq('pbf_id', pbfId);
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+    if (!data || data.length === 0) {
+      alert("Tidak ada data yang sesuai dengan filter tersebut.");
+      return;
+    }
+
+    // Konversi ke CSV
+    downloadCSV(data);
+    tutupModalExport();
+
+  } catch (err) {
+    alert("Gagal export: " + err.message);
+  } finally {
+    btnSubmit.innerText = "⬇️ Download CSV";
+    btnSubmit.disabled = false;
+  }
+});
+
+// 3. Helper: Konversi JSON ke CSV & Trigger Download
+function downloadCSV(data) {
+  const headers = ['Tanggal', 'Nama Barang', 'Satuan', 'Jumlah', 'Harga Satuan', 'Total Harga', 'Penyedia', 'PBF'];
+  
+  const csvRows = [];
+  csvRows.push(headers.join(','));
+
+  data.forEach(row => {
+    const total = (row.harga_barang || 0) * (row.jumlah || 0);
+    const values = [
+      row.tanggal_transaksi,
+      `"${row.barang?.nama_barang || 'Terhapus'}"`, // Pakai kutip biar aman jika ada koma
+      row.barang?.satuan || '-',
+      row.jumlah,
+      row.harga_barang || 0,
+      total,
+      `"${row.penyedia?.nama_penyedia || '-'}"`,
+      `"${row.pbf?.nama_pbf || '-'}"`
+    ];
+    csvRows.push(values.join(';'));
+  });
+
+  const csvString = csvRows.join('\n');
+  const blob = new Blob([csvString], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.setAttribute('hidden', '');
+  a.setAttribute('href', url);
+  a.setAttribute('download', `Laporan_Pengadaan_${new Date().toISOString().slice(0,10)}.csv`);
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
 
 // Jalankan saat pertama kali load
+updateDashboard();
 fetchPengadaan()
+fetchDropdownData()
 // fetchDaftarBarang()

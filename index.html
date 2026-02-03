@@ -30,16 +30,23 @@
         
         <div class="nav-container">
           <label for="menu-switcher">Pilih Menu:</label>
-         <select id="menu-switcher">
-          <option value="page-dashboard">📊 Dashboard</option> <option value="page-transaksi">📝 Transaksi Pengadaan</option>
-          <option value="page-barang">📦 Master Barang</option>
-        </select>
+          <select id="menu-switcher">
+            <option value="page-dashboard">📊 Dashboard</option>
+            <option value="page-transaksi">📝 Transaksi Pengadaan</option>
+            <option value="page-barang">📦 Master Barang</option>
+            <option value="page-penyedia">🏢 Master Penyedia</option>
+            <option value="page-pbf">🧪 Master PBF</option>
+          </select>
         </div>
 
         <hr>
 
         <section id="page-dashboard" class="content-page">
           <div class="summary-grid">
+            <div class="summary-card">
+              <h4>Total Pengeluaran</h4>
+              <p id="stat-total-biaya" class="money-text">Rp 0</p>
+            </div>
             <div class="summary-card">
               <h4>Total Jenis Barang</h4>
               <p id="stat-total-barang">0</p>
@@ -53,6 +60,13 @@
               <p id="stat-transaksi-hari-ini">0</p>
             </div>
           </div>
+
+          <div class="dashboard-actions">
+            <button onclick="bukaModalExport()" class="btn-primary-large">
+              📥 Export Laporan CSV
+            </button>
+          </div>
+
         </section>
 
         <section id="page-transaksi" class="content-page">
@@ -75,8 +89,42 @@
                     </div>
                   </div>
 
-                  <input type="number" id="jumlah" placeholder="Jumlah" required>
-                  <input type="date" id="tanggal_transaksi" required>
+                  <div id="pencarian-barang-container">
+                    </div>
+                  
+                  <!-- <hr> -->
+
+                  <div class="form-tabs">
+                    <input type="radio" id="tab-1" name="section-tab" value="section-detail" checked>
+                    <label for="tab-1">📦 Rencana</label>
+
+                    <input type="radio" id="tab-2" name="section-tab" value="section-vendor">
+                    <label for="tab-2">🏢 Aktual</label>
+                  </div>
+
+                  <div id="section-detail" class="tab-content">
+                    <label>Jumlah Unit:</label>
+                    <input type="number" id="jumlah" placeholder="Contoh: 10" required>
+                    
+                    <label>Tanggal Transaksi:</label>
+                    <input type="date" id="tanggal_transaksi" required>
+                  </div>
+
+                  <div id="section-vendor" class="tab-content" style="display: none;">
+                    <label>Pilih Penyedia:</label>
+                    <select id="select-penyedia" required>
+                      <option value="">-- Pilih Penyedia --</option>
+                    </select>
+
+                    <label>Pilih PBF:</label>
+                    <select id="select-pbf" required>
+                      <option value="">-- Pilih PBF --</option>
+                    </select>
+
+                    <label>Harga Satuan (Rp):</label>
+                    <input type="number" id="harga_barang" placeholder="Contoh: 50000" required>
+                  </div>
+
                   <button type="submit" id="btn-submit-pengadaan" disabled>Tambah Pengadaan</button>
                 </form>
               </div>
@@ -142,6 +190,40 @@
           </div>
         </section>
 
+        <section id="page-penyedia" class="content-page" style="display: none;">
+          <h2>Manajemen Penyedia</h2>
+          <div class="main-layout">
+            <div class="form-container">
+              <div class="card-section">
+                <form id="form-master-penyedia">
+                  <input type="text" id="nama-penyedia" placeholder="Nama Penyedia" required>
+                  <button type="submit" class="btn-green">Simpan Penyedia</button>
+                </form>
+              </div>
+            </div>
+            <div class="list-container">
+              <ul id="list-master-penyedia"></ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="page-pbf" class="content-page" style="display: none;">
+          <h2>Manajemen PBF</h2>
+          <div class="main-layout">
+            <div class="form-container">
+              <div class="card-section">
+                <form id="form-master-pbf">
+                  <input type="text" id="nama-pbf" placeholder="Nama PBF" required>
+                  <button type="submit" class="btn-green">Simpan PBF</button>
+                </form>
+              </div>
+            </div>
+            <div class="list-container">
+              <ul id="list-master-pbf"></ul>
+            </div>
+          </div>
+        </section>
+
       </div>
     </div>
 
@@ -185,6 +267,43 @@
         <p>Terima Kasih</p>
       </div>
     </div> -->
+
+    <div id="modal-export" class="modal" style="display: none;">
+      <div class="modal-content">
+        <h3>Filter Laporan Pengadaan</h3>
+        <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 15px;">
+          Pilih kriteria data yang ingin diunduh. Kosongkan filter jika ingin mengambil semua data.
+        </p>
+
+        <form id="form-export-csv">
+          <div class="filter-row">
+            <div class="filter-col">
+              <label>Dari Tanggal:</label>
+              <input type="date" id="export-start-date">
+            </div>
+            <div class="filter-col">
+              <label>Sampai Tanggal:</label>
+              <input type="date" id="export-end-date">
+            </div>
+          </div>
+
+          <label>Filter Penyedia:</label>
+          <select id="export-penyedia">
+            <option value="">-- Semua Penyedia --</option>
+            </select>
+
+          <label>Filter PBF:</label>
+          <select id="export-pbf">
+            <option value="">-- Semua PBF --</option>
+            </select>
+
+          <div class="modal-actions">
+            <button type="submit" class="btn-green">⬇️ Download CSV</button>
+            <button type="button" onclick="tutupModalExport()" class="btn-outline">Batal</button>
+          </div>
+        </form>
+      </div>
+    </div>
 
     <script type="module" src="/src/main.js"></script>
 

@@ -553,3 +553,116 @@ hr {
   .struk-row { display: flex; justify-content: space-between; margin: 5px 0; }
   .struk-header h2 { font-size: 1.1rem; margin-bottom: 5px; }
 }
+
+.summary-grid {
+  display: grid;
+  /* Membuat 2 kolom di mobile, 4 kolom di desktop */
+  grid-template-columns: repeat(2, 1fr); 
+  gap: 15px;
+}
+
+@media (min-width: 768px) {
+  .summary-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.money-text {
+  color: #10b981 !important; /* Hijau untuk menandakan uang/pertumbuhan */
+  font-size: 1.5rem !important; /* Sedikit lebih kecil agar Rp ... tidak overflow */
+}
+
+/* Responsif untuk teks panjang */
+@media (max-width: 480px) {
+  .summary-card p {
+    font-size: 1.2rem;
+  }
+}
+
+/* Container Radio Button */
+.form-tabs {
+  display: flex;
+  background: #f1f5f9;
+  padding: 5px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+/* Sembunyikan Radio Button asli */
+.form-tabs input[type="radio"] {
+  display: none;
+}
+
+/* Style Label sebagai Tombol */
+.form-tabs label {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+/* Style saat Radio Button Terpilih */
+.form-tabs input[type="radio"]:checked + label {
+  background: white;
+  color: #3b82f6;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Spasi untuk field di dalam tab */
+.tab-content {
+  padding: 10px 0;
+  animation: fadeIn 0.3s ease; /* Tambahkan sedikit animasi */
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Container Tombol Dashboard */
+.dashboard-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+  margin-bottom: 20px;
+}
+
+/* Tombol Besar Export */
+.btn-primary-large {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 50px; /* Bentuk kapsul */
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-primary-large:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.6);
+}
+
+/* Layout Form dalam Modal */
+.filter-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.filter-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
